@@ -163,6 +163,16 @@ const Container = styled.div`
       background-color: #4e0eff;
     }
   }
+  @media (max-width: 768px) {
+    .avatars {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .title-container {
+      font-size: 16px;
+      text-align: center;
+    }
+  }
 `;
 
 export default SetAvatar;

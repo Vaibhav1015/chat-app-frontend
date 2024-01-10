@@ -25,7 +25,7 @@ const Contacts = ({ contacts, changeChat }) => {
       {currentUserImage && currentUsername && (
         <Container>
           <div className="brand">
-            <img src={Logo} alt="logo" />
+            <img src={Logo} alt="logo" className="main_logo" />
             <h3>chat-app</h3>
           </div>
           <div className="contacts">
@@ -56,6 +56,7 @@ const Contacts = ({ contacts, changeChat }) => {
               <img
                 src={`data:image/svg+xml;base64,${currentUserImage}`}
                 alt="avatar"
+                className="user_img"
               />
             </div>
             <div className="username">
@@ -152,6 +153,43 @@ const Container = styled.div`
           font-size: 1rem;
         }
       }
+    }
+  }
+  @media (max-width: 768px) {
+    .contacts {
+      width: 100%;
+    }
+    .brand {
+      display: block;
+    }
+
+    .contact {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 5px !important;
+    }
+
+    h3 {
+      white-space: nowrap;
+      font-size: 17px;
+    }
+    .avatar img {
+      height: 3rem !important;
+    }
+    .current-user {
+      align-items: start !important;
+      flex-direction: column;
+      gap: 0;
+    }
+    .user_img {
+      margin-left: 20px !important;
+    }
+    .username {
+      margin-left: 10px;
+    }
+    .main_logo {
+      width: 100%;
     }
   }
 `;

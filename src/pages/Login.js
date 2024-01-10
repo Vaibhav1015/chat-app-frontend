@@ -192,6 +192,12 @@ const FormContainer = styled.div`
       }
     }
   }
+  @media (max-width: 768px) {
+    form {
+      padding: 2rem;
+      width: 95%;
+    }
+  }
 `;
 
 export default Login;

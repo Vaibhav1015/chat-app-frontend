@@ -130,6 +130,48 @@ const Container = styled.div`
       }
     }
   }
+  .contacts {
+    width: 65%;
+  }
+  .contact {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px !important;
+  }
+
+  h3 {
+    white-space: nowrap;
+  }
+  .avatar img {
+    height: 3rem !important;
+  
+    marg
+  }
+  .current-user {
+    align-items: start !important;
+    flex-direction: column;
+    gap: 0;
+  }
+  .user_img{
+    margin-left: 20px !important;
+  }
+  .username{
+    margin-left: 10px;
+  }
+}
+@media (max-width: 768px) {
+  .input-container input {
+    font-size: 15px !important;
+    padding-left:2rem !important;
+  }
+}
+ .input-container button {
+  padding: 1.3px 0.5rem !important;
+}
+.input-container {
+  gap: 0rem !important;
+}
 `;
 
 export default ChatInput;

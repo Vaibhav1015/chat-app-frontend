@@ -96,6 +96,11 @@ const Container = styled.div`
       grid-template-columns: 35% 65%;
     }
   }
+  @media (max-width: 768px) {
+    .container {
+      width: 95%;
+    }
+  }
 `;
 
 export default Chat;
