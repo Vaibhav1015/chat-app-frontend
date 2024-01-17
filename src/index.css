@@ -9,7 +9,18 @@
 
 body,button,input{
     font-family: 'Josefin Sans', sans-serif;
+    font-size: 14px;
 }
+
+h3{
+    font-size: 20px !important;
+}
+
+h2{
+    font-size: 20px !important;
+}
+
+
 
 body {
     max-height: 100vh;

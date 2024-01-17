@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { useNavigate } from "react-router-dom";
-import loader from "../assets/loader.gif";
+// import loader from "../assets/loader.gif";
+import Loader from "../components/Loader";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
@@ -75,7 +76,8 @@ const SetAvatar = () => {
     <>
       {isLoading ? (
         <Container>
-          <img src={loader} alt="loader" className="loader" />
+          {/* <img src={loader} alt="loader" className="loader" /> */}
+          <Loader />
         </Container>
       ) : (
         <Container>

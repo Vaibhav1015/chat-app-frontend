@@ -6,12 +6,15 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import { loginRoute } from "../utils/APIRoutes";
+import Loader from "../components/Loader";
+
 const Login = () => {
   const navigate = useNavigate();
   const [values, setValues] = useState({
     username: "",
     password: "",
   });
+  const [loading, setLoading] = useState(false);
   const toastOptions = {
     position: "top-right",
     autoClose: 5000,
@@ -30,20 +33,28 @@ const Login = () => {
     e.preventDefault();
     if (handleValidation()) {
       const { password, username } = values;
-      console.log(password, "<<<pass", username);
-      const { data } = await axios.post(loginRoute, {
-        username,
-        password,
-      });
-      console.log(data);
+      setLoading(true);
+      try {
+        const { data } = await axios.post(loginRoute, {
+          username,
+          password,
+        });
 
-      if (data.status === false) {
-        toast.error(data.message, toastOptions);
-      }
+        if (data.status === false) {
+          toast.error(data.message, toastOptions);
+        }
 
-      if (data.status === true) {
-        localStorage.setItem("chat-app-user", JSON.stringify(data.user));
-        navigate("/");
+        if (data.status === true) {
+          localStorage.setItem("chat-app-user", JSON.stringify(data.user));
+          navigate("/");
+        }
+      } catch (error) {
+        toast.error(
+          "An error occurred while processing your request",
+          toastOptions
+        );
+      } finally {
+        setLoading(false); // Set loading to false when API request is complete
       }
     }
   };
@@ -114,7 +125,8 @@ const Login = () => {
             name="password"
             onChange={(e) => handleChange(e)}
           />
-          <button type="submit">Login</button>
+          {loading && <Loader />} {/* Show loader when loading */}
+          {!loading && <button type="submit">Login</button>}
           <span>
             Don't have an account ? <Link to="/register">Register</Link>
           </span>
@@ -124,6 +136,111 @@ const Login = () => {
     </>
   );
 };
+
+const Container = styled.div`
+  .three-body {
+    --uib-size: 35px;
+    --uib-speed: 0.8s;
+    --uib-color: #5d3fd3;
+    position: relative;
+    display: inline-block;
+    height: var(--uib-size);
+    width: var(--uib-size);
+    animation: spin78236 calc(var(--uib-speed) * 2.5) infinite linear;
+  }
+
+  .three-body__dot {
+    position: absolute;
+    height: 100%;
+    width: 30%;
+  }
+
+  .three-body__dot:after {
+    content: "";
+    position: absolute;
+    height: 0%;
+    width: 100%;
+    padding-bottom: 100%;
+    background-color: var(--uib-color);
+    border-radius: 50%;
+  }
+
+  .three-body__dot:nth-child(1) {
+    bottom: 5%;
+    left: 0;
+    transform: rotate(60deg);
+    transform-origin: 50% 85%;
+  }
+
+  .three-body__dot:nth-child(1)::after {
+    bottom: 0;
+    left: 0;
+    animation: wobble1 var(--uib-speed) infinite ease-in-out;
+    animation-delay: calc(var(--uib-speed) * -0.3);
+  }
+
+  .three-body__dot:nth-child(2) {
+    bottom: 5%;
+    right: 0;
+    transform: rotate(-60deg);
+    transform-origin: 50% 85%;
+  }
+
+  .three-body__dot:nth-child(2)::after {
+    bottom: 0;
+    left: 0;
+    animation: wobble1 var(--uib-speed) infinite calc(var(--uib-speed) * -0.15)
+      ease-in-out;
+  }
+
+  .three-body__dot:nth-child(3) {
+    bottom: -5%;
+    left: 0;
+    transform: translateX(116.666%);
+  }
+
+  .three-body__dot:nth-child(3)::after {
+    top: 0;
+    left: 0;
+    animation: wobble2 var(--uib-speed) infinite ease-in-out;
+  }
+
+  @keyframes spin78236 {
+    0% {
+      transform: rotate(0deg);
+    }
+
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes wobble1 {
+    0%,
+    100% {
+      transform: translateY(0%) scale(1);
+      opacity: 1;
+    }
+
+    50% {
+      transform: translateY(-66%) scale(0.65);
+      opacity: 0.8;
+    }
+  }
+
+  @keyframes wobble2 {
+    0%,
+    100% {
+      transform: translateY(0%) scale(1);
+      opacity: 1;
+    }
+
+    50% {
+      transform: translateY(66%) scale(0.65);
+      opacity: 0.8;
+    }
+  }
+`;
 
 const FormContainer = styled.div`
   height: 100vh;

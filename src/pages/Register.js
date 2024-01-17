@@ -6,8 +6,10 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import { registerRoute } from "../utils/APIRoutes";
+import Loader from "../components/Loader";
 const Register = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
   const [values, setValues] = useState({
     username: "",
     email: "",
@@ -32,20 +34,31 @@ const Register = () => {
     e.preventDefault();
     if (handleValidation()) {
       const { password, username, email } = values;
-      const { data } = await axios.post(registerRoute, {
-        username,
-        email,
-        password,
-      });
+      setLoading(true);
 
-      if (data.status === false) {
-        toast.error(data.message, toastOptions);
-      }
+      try {
+        const { data } = await axios.post(registerRoute, {
+          username,
+          email,
+          password,
+        });
 
-      if (data.status === true) {
-        localStorage.setItem("chat-app-user", JSON.stringify(data.user));
+        if (data.status === false) {
+          toast.error(data.message, toastOptions);
+        }
+
+        if (data.status === true) {
+          localStorage.setItem("chat-app-user", JSON.stringify(data.user));
+          navigate("/");
+        }
+      } catch (error) {
+        toast.error(
+          "An error occurred while processing your request",
+          toastOptions
+        );
+      } finally {
+        setLoading(false); // Set loading to false when API request is complete
       }
-      navigate("/");
     }
   };
 
@@ -140,7 +153,8 @@ const Register = () => {
             name="confirmPassword"
             onChange={(e) => handleChange(e)}
           />
-          <button type="submit">Create User</button>
+          {loading && <Loader />}
+          {!loading && <button type="submit">Create User</button>}
           <span>
             Already have an account ? <Link to="/login">Login</Link>
           </span>

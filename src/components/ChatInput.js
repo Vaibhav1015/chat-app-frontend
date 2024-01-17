@@ -100,8 +100,8 @@ const Container = styled.div`
     border-radius: 2rem;
     display: flex;
     align-items: center;
-    gap: 2rem;
     background-color: #ffffff34;
+    justify-content: space-between;
     input {
       width: 90%;
       background-color: transparent;

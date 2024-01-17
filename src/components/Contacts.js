@@ -45,7 +45,7 @@ const Contacts = ({ contacts, changeChat }) => {
                     />
                   </div>
                   <div className="username">
-                    <h3>{contact.username}</h3>
+                    <h2>{contact.username}</h2>
                   </div>
                 </div>
               );
@@ -79,6 +79,7 @@ const Container = styled.div`
     display: flex;
     justify-content: center;
     gap: 1rem;
+    align-items: center;
     img {
       height: 2rem;
     }
@@ -120,7 +121,7 @@ const Container = styled.div`
         }
       }
       .username {
-        h3 {
+        h2 {
           color: white;
         }
       }
