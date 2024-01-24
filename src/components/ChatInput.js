@@ -3,10 +3,13 @@ import styled from "styled-components";
 import Picker from "emoji-picker-react";
 import { IoMdSend } from "react-icons/io";
 import { BsEmojiSmileFill } from "react-icons/bs";
+import attachFile from "../assets/attachfile.svg";
 
-const ChatInput = ({ handleSendMsg }) => {
+const ChatInput = ({ handleSendMsg, formData }) => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [msg, setMsg] = useState("");
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
 
   const handleEmojiPickerHideShow = () => {
     setShowEmojiPicker(!showEmojiPicker);
@@ -18,11 +21,32 @@ const ChatInput = ({ handleSendMsg }) => {
     setMsg(message);
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+
+    setSelectedFile(file);
+
+    // Create a FileReader to read the image file and set the preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result);
+    };
+    if (file) {
+      reader.readAsDataURL(file);
+    } else {
+      setImagePreview(null);
+    }
+  };
+
   const sentChat = (e) => {
     e.preventDefault();
-    if (msg.length > 0) {
-      handleSendMsg(msg);
+
+    if (msg.trim().length > 0 || selectedFile) {
+      // Check if either message or file is present
+      handleSendMsg(msg, selectedFile, formData);
       setMsg("");
+      setSelectedFile(null); // Reset selected file after sending
+      setImagePreview(null);
     }
   };
 
@@ -35,9 +59,19 @@ const ChatInput = ({ handleSendMsg }) => {
         </div>
       </div>
       <form className="input-container" onSubmit={(e) => sentChat(e)}>
+        <div className="image-upload">
+          <label htmlFor="file-input">
+            {imagePreview ? (
+              <img src={imagePreview} alt="Preview" />
+            ) : (
+              <img src={attachFile} alt="Attach File" />
+            )}
+          </label>
+          <input id="file-input" type="file" onChange={handleFileChange} />
+        </div>
         <input
           type="text"
-          placeholder="type your message here"
+          placeholder="Type your message here"
           value={msg}
           onChange={(e) => setMsg(e.target.value)}
         />
@@ -62,7 +96,7 @@ const Container = styled.div`
       position: relative;
       svg {
         font-size: 1.5rem;
-        color: #ffff00c8;
+        color: #9186f3;
         cursor: pointer;
         margin: 0px 05px;
       }
@@ -172,6 +206,25 @@ const Container = styled.div`
 .input-container {
   gap: 0rem !important;
 }
+
+
+.image-upload{
+  margin: 0px 15px;
+}
+
+.image-upload > input
+{
+    display: none;
+}
+
+.image-upload img
+{
+    width: 25px;
+    height:25px;
+    cursor: pointer;
+    transform: rotate(-25deg);
+}
+
 `;
 
 export default ChatInput;

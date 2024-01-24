@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
-import Logout from "./Logout";
 import ChatInput from "./ChatInput";
 import axios from "axios";
 import { getAllMessageRoute, sendMessageRoute } from "../utils/APIRoutes";
@@ -9,6 +8,7 @@ const ChatContainer = ({ currentChat, currentUser, socket }) => {
   const [messages, SetMessages] = useState([]);
   const [arrivalMessage, setArrivalMessage] = useState(null);
   const scrollRef = useRef();
+
   useEffect(() => {
     const fetchData = async () => {
       const data = await JSON.parse(localStorage.getItem("chat-app-user"));
@@ -33,37 +33,64 @@ const ChatContainer = ({ currentChat, currentUser, socket }) => {
     getCurrentChat();
   }, [currentChat]);
 
-  const handleSendMsg = async (msg) => {
+  const handleSendMsg = async (msg, media, formData) => {
     const data = await JSON.parse(localStorage.getItem("chat-app-user"));
 
-    socket.current.emit("send-msg", {
-      to: currentChat._id,
-      from: data._id,
-      message: msg,
-    });
+    try {
+      formData = new FormData();
+      formData.append("from", data._id);
+      formData.append("to", currentChat._id);
+      formData.append("media", media);
+      formData.append("message", msg);
 
-    await axios.post(sendMessageRoute, {
-      from: data._id,
-      to: currentChat._id,
-      message: msg,
-    });
+      if (media !== null && msg.length === 0) {
+        socket.current.emit("send-media", {
+          to: currentChat._id,
+          from: data._id,
+          media,
+        });
+      }
 
-    const msgs = [...messages];
-    msgs.push({ fromSelf: true, message: msg });
-    SetMessages(msgs);
+      if ((msg.length !== 0) & (media === null)) {
+        socket.current.emit("send-msg", {
+          to: currentChat._id,
+          from: data._id,
+          message: msg,
+        });
+      }
+
+      await axios.post(sendMessageRoute, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      const updatedMessages = [
+        ...messages,
+        { fromSelf: true, message: { text: msg, mediaUrl: media } },
+      ];
+      SetMessages(updatedMessages);
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
   };
 
   useEffect(() => {
     const fetchData = () => {
       if (socket.current) {
         socket.current.on("msg-recieve", (msg) => {
-          console.log("Message received:", msg);
-          setArrivalMessage({ fromSelf: false, message: msg });
+          console.log(msg, "msg from socket");
+          const newMsg = { text: msg };
+          setArrivalMessage({ fromSelf: false, message: newMsg });
         });
       }
+
+      socket.current.on("media-recieve", (mediaNew) => {
+        setArrivalMessage({ fromSelf: false, message: mediaNew });
+      });
     };
     fetchData();
-  }, []);
+  }, [socket]);
 
   useEffect(() => {
     const fetchData = () => {
@@ -107,7 +134,17 @@ const ChatContainer = ({ currentChat, currentUser, socket }) => {
                     }`}
                   >
                     <div className="content">
-                      <p>{message.message}</p>
+                      {/* Display media content if it's a media message */}
+                      {message.message.mediaUrl ? (
+                        <img
+                          src={message.message.mediaUrl}
+                          alt="Media"
+                          style={{ height: "200px", width: "200px" }}
+                        />
+                      ) : (
+                        // Display text content if it's a text message
+                        <p>{message.message.text}</p>
+                      )}
                     </div>
                   </div>
                 </div>
