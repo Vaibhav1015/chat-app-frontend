@@ -35,7 +35,7 @@ const Contacts = ({ contacts, changeChat }) => {
             <img src={Logo} alt="logo" className="main_logo" />
             <h3>chat-app</h3>
           </div>
-          <div className="contacts">
+          <div className="contacts scrollbar">
             {contacts.map((contact, index) => {
               return (
                 <div
@@ -106,13 +106,15 @@ const Container = styled.div`
     align-items: center;
     overflow: auto;
     gap: 0.8rem;
-    &::::-webkit-scrollbar {
+    scrollbar-width: thin; /* Firefox */
+    scrollbar-color: #ffffff39 #080420; /* Firefox */
+    &::-webkit-scrollbar {
       width: 0.2rem;
-      &-thumb {
-        background-color: #ffffff39;
-        width: 0.1rem;
-        border-radius: 1rem;
-      }
+    }
+    &::-webkit-scrollbar-thumb {
+      background-color: #ffffff39;
+      width: 0.1rem;
+      border-radius: 1rem;
     }
     .contact {
       background-color: #ffffff39;
