@@ -1,24 +1,27 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { useNavigate } from "react-router-dom";
 import { BiPowerOff } from "react-icons/bi";
 import { Modal, Button as BootstrapButton } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-const Logout = () => {
-  const navigate = useNavigate();
+const PopUpModal = ({
+  bodyText,
+  handleOnClick,
+  submitButtonText,
+  buttonIcon,
+}) => {
   const [showModal, setShowModal] = useState(false);
-
-  const handleLogout = () => {
-    localStorage.clear();
-    navigate("/login");
+  const renderButtonIcon = () => {
+    if (buttonIcon) {
+      // If a custom button icon is provided, use it
+      return buttonIcon;
+    }
+    // Default to BiPowerOff icon if no custom icon is provided
+    return <BiPowerOff />;
   };
-
   return (
     <>
-      <Button onClick={() => setShowModal(true)}>
-        <BiPowerOff />
-      </Button>
+      <Button onClick={() => setShowModal(true)}>{renderButtonIcon()}</Button>
 
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Modal.Body
@@ -27,7 +30,7 @@ const Logout = () => {
             color: "white",
           }}
         >
-          Are you sure you want to logout?
+          {bodyText}
         </Modal.Body>
         <Modal.Footer style={{ backgroundColor: "#0d0d30", color: "white" }}>
           <BootstrapButton
@@ -42,11 +45,11 @@ const Logout = () => {
             style={{ backgroundColor: "#9a86f3", border: "none" }}
             variant="primary"
             onClick={() => {
-              handleLogout();
+              handleOnClick();
               setShowModal(false);
             }}
           >
-            Logout
+            {submitButtonText}
           </BootstrapButton>
         </Modal.Footer>
       </Modal>
@@ -69,4 +72,4 @@ const Button = styled.button`
   }
 `;
 
-export default Logout;
+export default PopUpModal;

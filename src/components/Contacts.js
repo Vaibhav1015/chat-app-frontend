@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import Logo from "../assets/logo.svg";
-import Logout from "./Logout";
+import { useNavigate } from "react-router-dom";
+import PopUpModal from "./PopUpModal";
 const Contacts = ({ contacts, changeChat }) => {
+  const navigate = useNavigate();
   const [currentUsername, SetCurrentUsername] = useState(undefined);
   const [currentUserImage, SetCurrentUserImage] = useState(undefined);
   const [currentSelected, SetCurrentSelected] = useState(undefined);
@@ -19,6 +21,11 @@ const Contacts = ({ contacts, changeChat }) => {
   const changeCurrentChat = (index, contact) => {
     SetCurrentSelected(index);
     changeChat(contact);
+  };
+
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/login");
   };
   return (
     <>
@@ -62,7 +69,11 @@ const Contacts = ({ contacts, changeChat }) => {
             <div className="username">
               <h2>{currentUsername}</h2>
             </div>
-            <Logout />
+            <PopUpModal
+              bodyText="Are you sure you want to logout?"
+              submitButtonText="Logout"
+              handleOnClick={handleLogout}
+            />
           </div>
         </Container>
       )}

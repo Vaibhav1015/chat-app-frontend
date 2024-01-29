@@ -2,12 +2,52 @@ import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
 import ChatInput from "./ChatInput";
 import axios from "axios";
-import { getAllMessageRoute, sendMessageRoute } from "../utils/APIRoutes";
+import {
+  deleteMessages,
+  getAllMessageRoute,
+  sendMessageRoute,
+} from "../utils/APIRoutes";
 import { v4 as uuidv4 } from "uuid";
-const ChatContainer = ({ currentChat, currentUser, socket }) => {
+import trashIcon from "../assets/trash.svg";
+import PopUpModal from "./PopUpModal";
+const ChatContainer = ({ currentChat, socket }) => {
   const [messages, SetMessages] = useState([]);
+  const [selectedMessages, setSelectedMessages] = useState([]);
   const [arrivalMessage, setArrivalMessage] = useState(null);
   const scrollRef = useRef();
+
+  const handleSelectMessage = (messageId) => {
+    setSelectedMessages((prevSelected) => {
+      const isSelected = prevSelected.includes(messageId);
+      if (isSelected) {
+        return prevSelected.filter((selectedId) => selectedId !== messageId);
+      } else {
+        return [...prevSelected, messageId];
+      }
+    });
+  };
+
+  // const canDeleteMessage = (message) => {
+  //   // Allow deleting only if the message is sent by the current user
+  //   return message.fromSelf;
+  // };
+
+  const handleDeleteSelectedMessages = async () => {
+    try {
+      // Send a DELETE request to the server
+      await axios.delete(deleteMessages, {
+        data: { messageIds: selectedMessages },
+      });
+      // Update the state to remove deleted messages
+      const updatedMessages = messages.filter(
+        (message) => !selectedMessages.includes(message._id)
+      );
+      SetMessages(updatedMessages);
+      setSelectedMessages([]);
+    } catch (error) {
+      console.error("Error deleting messages:", error);
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -59,15 +99,20 @@ const ChatContainer = ({ currentChat, currentUser, socket }) => {
         });
       }
 
-      await axios.post(sendMessageRoute, formData, {
+      const sendMessageData = await axios.post(sendMessageRoute, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
+      const messageId = sendMessageData.data.data._id;
 
       const updatedMessages = [
         ...messages,
-        { fromSelf: true, message: { text: msg, mediaUrl: media } },
+        {
+          fromSelf: true,
+          message: { text: msg, mediaUrl: media },
+          _id: messageId,
+        },
       ];
       SetMessages(updatedMessages);
     } catch (error) {
@@ -79,7 +124,6 @@ const ChatContainer = ({ currentChat, currentUser, socket }) => {
     const fetchData = () => {
       if (socket.current) {
         socket.current.on("msg-recieve", (msg) => {
-          console.log(msg, "msg from socket");
           const newMsg = { text: msg };
           setArrivalMessage({ fromSelf: false, message: newMsg });
         });
@@ -122,7 +166,22 @@ const ChatContainer = ({ currentChat, currentUser, socket }) => {
                 <h3>{currentChat.username}</h3>
               </div>
             </div>
-            {/* <Logout /> */}
+            {/* Delete button here */}
+            {selectedMessages.length > 0 && (
+              <PopUpModal
+                bodyText="Are you sure you want to delete selected messages?"
+                handleOnClick={handleDeleteSelectedMessages}
+                submitButtonText="Delete"
+                buttonIcon={
+                  <img
+                    src={trashIcon}
+                    alt="trash-icon"
+                    width="20"
+                    height="20"
+                  />
+                }
+              />
+            )}
           </div>
           <div className="chat-messages">
             {messages.map((message) => {
@@ -143,7 +202,16 @@ const ChatContainer = ({ currentChat, currentUser, socket }) => {
                         />
                       ) : (
                         // Display text content if it's a text message
-                        <p>{message.message.text}</p>
+                        <p className="message-text">{message.message.text}</p>
+                      )}
+                      {/* Checkbox for selecting messages */}
+                      {message.fromSelf && (
+                        <input
+                          type="checkbox"
+                          className="checkbox-btn"
+                          checked={selectedMessages.includes(message._id)}
+                          onChange={() => handleSelectMessage(message._id)}
+                        />
                       )}
                     </div>
                   </div>
@@ -198,12 +266,27 @@ const Container = styled.div`
       display: flex;
       align-items: center;
       .content {
+        position: relative;
+        display: flex;
+        align-items: center;
         max-width: 40%;
         overflow-wrap: break-word;
-        padding: 1rem;
+        padding: 0.5rem;
         font-size: 1.1rem;
         border-radius: 1rem;
         color: #d1d1d1;
+        .checkbox-btn {
+          opacity: 0;
+          transition: opacity 0.3s ease;
+          margin: 10px;
+        }
+        .message-text {
+          margin-bottom: 0rem;
+        }
+      }
+      .content:hover .checkbox-btn,
+      .checkbox-btn:checked {
+        opacity: 1;
       }
     }
 
@@ -217,6 +300,11 @@ const Container = styled.div`
     .received {
       justify-content: flex-start;
     }
+  }
+
+  .trash-btn {
+    background: transparent;
+    border: none;
   }
 `;
 
