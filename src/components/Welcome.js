@@ -1,14 +1,17 @@
 import React from "react";
 import styled from "styled-components";
 import Robot from "../assets/robot.gif";
-const Welcome = ({ currentUser }) => {
+const Welcome = ({ headerText, currentUser, bodyText }) => {
   return (
     <Container>
       <img src={Robot} alt="robot" />
-      <h1>
-        Welcome,<span>{currentUser.username}!</span>
-      </h1>
-      <h3>Please select a chat to Start Messaging</h3>
+      {headerText && (
+        <h1>
+          {headerText}
+          <span>{currentUser}</span>
+        </h1>
+      )}
+      {bodyText && <h3>{bodyText}</h3>}
     </Container>
   );
 };

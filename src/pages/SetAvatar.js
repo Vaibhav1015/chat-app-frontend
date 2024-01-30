@@ -29,7 +29,7 @@ const SetAvatar = () => {
       }
     };
     data();
-  }, []);
+  }, [navigate]);
 
   const setProfilePicture = async () => {
     if (selectedAvatar === undefined) {

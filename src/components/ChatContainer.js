@@ -11,13 +11,21 @@ import { v4 as uuidv4 } from "uuid";
 import trashIcon from "../assets/trash.svg";
 import PopUpModal from "./PopUpModal";
 import moment from "moment";
+import Searchbar from "./Searchbar";
+import Welcome from "./Welcome";
 
 const ChatContainer = ({ currentChat, socket }) => {
   const [messages, setMessages] = useState([]);
   const [selectedMessages, setSelectedMessages] = useState([]);
   const [arrivalMessage, setArrivalMessage] = useState(null);
   const scrollRef = useRef();
-  // const [currentDisplayedDate, setCurrentDisplayedDate] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filterMessages = () => {
+    return messages.filter((message) =>
+      message.message.text.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  };
 
   const formatMessageTime = (createdAt) => {
     return moment(createdAt).format("h:mm A");
@@ -170,94 +178,113 @@ const ChatContainer = ({ currentChat, socket }) => {
                 <h3>{currentChat.username}</h3>
               </div>
             </div>
-            {/* Delete button here */}
-            {selectedMessages.length > 0 && (
-              <PopUpModal
-                bodyText="Are you sure you want to delete selected messages?"
-                handleOnClick={handleDeleteSelectedMessages}
-                submitButtonText="Delete"
-                buttonIcon={
-                  <img
-                    src={trashIcon}
-                    alt="trash-icon"
-                    width="20"
-                    height="20"
+            <div className="chat-functions">
+              {selectedMessages.length === 0 && (
+                <Searchbar setSearchQuery={setSearchQuery} />
+              )}
+
+              {/* Delete button here */}
+              {selectedMessages.length > 0 && (
+                <>
+                  <div style={{ color: "#d1d1d1", fontSize: "16px" }}>
+                    Selected {selectedMessages.length}
+                  </div>
+                  <PopUpModal
+                    bodyText="Are you sure you want to delete selected messages?"
+                    handleOnClick={handleDeleteSelectedMessages}
+                    submitButtonText="Delete"
+                    buttonIcon={
+                      <img
+                        src={trashIcon}
+                        alt="trash-icon"
+                        width="20"
+                        height="20"
+                      />
+                    }
                   />
-                }
-              />
-            )}
+                </>
+              )}
+            </div>
           </div>
-          <div className="chat-messages scrollbar" id="style-1">
-            {messages.map((message, index) => {
-              const isToday = moment().isSame(moment(message.createdAt), "day");
-              const isNewDay =
-                index === 0 ||
-                !moment(messages[index - 1].createdAt).isSame(
+
+          {messages.length > 0 ? (
+            <div className="chat-messages scrollbar" id="style-1">
+              {filterMessages().map((message, index) => {
+                const isToday = moment().isSame(
                   moment(message.createdAt),
                   "day"
                 );
+                const isNewDay =
+                  index === 0 ||
+                  !moment(messages[index - 1].createdAt).isSame(
+                    moment(message.createdAt),
+                    "day"
+                  );
 
-              return (
-                <div key={uuidv4()}>
-                  {isNewDay && (
-                    <div
-                      style={{
-                        color: "white",
-                        display: "flex",
-                        justifyContent: "center",
-                      }}
-                    >
-                      {isToday
-                        ? "Today"
-                        : moment(message.createdAt).isSame(
-                            moment().subtract(1, "day"),
-                            "day"
-                          )
-                        ? "Yesterday"
-                        : moment(message.createdAt).format("DD-MM-YYYY")}
-                    </div>
-                  )}
-                  <div ref={scrollRef}>
-                    <div
-                      className={`message ${
-                        message.fromSelf ? "sended" : "received"
-                      }`}
-                    >
-                      <div className="message-box">
-                        {/* Display media content if it's a media message */}
-                        {message.message.mediaUrl ? (
-                          <img
-                            src={message.message.mediaUrl}
-                            alt="Media"
-                            style={{ height: "200px", width: "200px" }}
-                          />
-                        ) : (
-                          // Display text content if it's a text message
-                          <div className="content">
-                            <p className="message-text">
-                              {message.message.text}
-                            </p>
-                          </div>
-                        )}
-                        {/* Checkbox for selecting messages */}
-                        <div className="message-time">
-                          {formatMessageTime(message.createdAt)}
-                        </div>
+                return (
+                  <div key={uuidv4()}>
+                    {isNewDay && (
+                      <div
+                        style={{
+                          color: "#d1d1d1",
+                          display: "flex",
+                          justifyContent: "center",
+                        }}
+                      >
+                        {isToday
+                          ? "Today"
+                          : moment(message.createdAt).isSame(
+                              moment().subtract(1, "day"),
+                              "day"
+                            )
+                          ? "Yesterday"
+                          : moment(message.createdAt).format("DD-MM-YYYY")}
                       </div>
-                      {message.fromSelf && (
-                        <input
-                          type="checkbox"
-                          className="checkbox-btn"
-                          checked={selectedMessages.includes(message._id)}
-                          onChange={() => handleSelectMessage(message._id)}
-                        />
-                      )}
+                    )}
+                    <div ref={scrollRef}>
+                      <div
+                        className={`message ${
+                          message.fromSelf ? "sended" : "received"
+                        }`}
+                      >
+                        <div className="message-box">
+                          {/* Display media content if it's a media message */}
+                          {message.message.mediaUrl ? (
+                            <img
+                              src={message.message.mediaUrl}
+                              alt="Media"
+                              style={{ height: "200px", width: "200px" }}
+                            />
+                          ) : (
+                            // Display text content if it's a text message
+                            <div className="content">
+                              <p className="message-text">
+                                {message.message.text}
+                              </p>
+                            </div>
+                          )}
+                          {/* Checkbox for selecting messages */}
+                          <div className="message-time">
+                            {formatMessageTime(message.createdAt)}
+                          </div>
+                        </div>
+                        {message.fromSelf && (
+                          <input
+                            type="checkbox"
+                            className="checkbox-btn"
+                            checked={selectedMessages.includes(message._id)}
+                            onChange={() => handleSelectMessage(message._id)}
+                          />
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          ) : (
+            <Welcome bodyText={`Start chat with ${currentChat.username}`} />
+          )}
           <ChatInput handleSendMsg={handleSendMsg} />
         </Container>
       )}
@@ -294,6 +321,11 @@ const Container = styled.div`
         }
       }
     }
+    .chat-functions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
   }
   .chat-messages {
     padding: 1rem 2rem;
@@ -313,8 +345,8 @@ const Container = styled.div`
         position: relative;
         display: flex;
         align-items: center;
-        max-width: 40%;
-        overflow-wrap: break-word;
+
+        overflow-wrap: anywhere;
         font-size: 1.1rem;
         border-radius: 1rem;
         color: #d1d1d1;
@@ -334,6 +366,7 @@ const Container = styled.div`
         background-color: #ffffff34;
         border-radius: 5px;
         padding: 0px 10px 0px 5px;
+        max-width: 70%;
       }
     }
 

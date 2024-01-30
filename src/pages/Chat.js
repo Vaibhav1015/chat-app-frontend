@@ -51,7 +51,7 @@ const Chat = () => {
       }
     };
     fetchContacts();
-  }, [currentUser]);
+  }, [currentUser, navigate]);
 
   const handleChatChange = (chat) => {
     setCurrentChat(chat);
@@ -63,7 +63,11 @@ const Chat = () => {
         <div className="container">
           <Contacts contacts={contacts} changeChat={handleChatChange} />
           {isLoaded && currentChat === undefined ? (
-            <Welcome currentUser={currentUser} />
+            <Welcome
+              currentUser={`${currentUser.username}!`}
+              headerText="Welcome,"
+              bodyText="Please select a chat to Start Messaging"
+            />
           ) : (
             <ChatContainer
               currentChat={currentChat}
